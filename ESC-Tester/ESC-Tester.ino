@@ -11,9 +11,10 @@ byte data[7]; //Input data from radio
 const int ESCpins[4] = {9, 8, 7, 6};
 Servo ESC[4];
 int ESCval[4];
-bool ESCactivated[4] = {false, false, false, false};
+bool ESCactivated[4];
 const int minESCval = 1000;
 const int maxESCval = 2000;
+const int maxESCdiff = 1000;
 
 //LED vars
 CRGB leds[4];
@@ -147,15 +148,30 @@ void loop() {
   } else {
     neutral = minESCval;
   }
+  for(int i=0; i<4; i++) {
+    //Set starting value
+    ESCval[i] = 0;
+
+    //If ESC activated, apply change depending on the joystick value
+    if (ESCactivated[i]) {
+      if (i < 2) {
+        ESCval[i] += leftPercent*maxESCdiff - maxESCdiff/2;
+      } else {
+        ESCval[i] += rightPercent*maxESCdiff - maxESCdiff/2;
+      }
+
+      if (not reverseMode) {
+        ESCval[i] = max(ESCval[i]*2, 0);
+      }
+    }
+
+    ESCval[i] += neutral;
+  }
 
   //Apply to hardware
   if (ESC[0].attached()) {
     for(int i=0; i<4; i++) {
-      if (ESCactivated[i]) {
-        ESC[i].writeMicroseconds(ESCval);
-      } else {
-        ESC[i].writeMicroseconds(neutral);
-      }
+      ESC[i].writeMicroseconds(ESCval[i]);
 
       //Set LED colour
       if (not ESCactivated[i] or ESCval[i] == neutral) {
