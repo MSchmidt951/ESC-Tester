@@ -175,4 +175,11 @@ void loop() {
   }
   FastLED.show();
   digitalWrite(modeLED, reverseMode);
+
+  //Print ESC values to serial
+  for(int i=0; i<4; i++) {
+    Serial.print(ESCval[i]);
+    Serial.print('\t');
+  }
+  Serial.println();
 }
