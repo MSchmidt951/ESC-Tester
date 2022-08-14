@@ -18,7 +18,7 @@ const int maxESCval = 2000;
 //LED vars
 CRGB leds[4];
 const int modeLED = 4;
-const int LED_Max = 100;
+const int LED_Max = 40;
 
 //Misc vars
 bool reverseMode = true; //Reverse mode sets the neutral to the mid point
@@ -43,6 +43,7 @@ void ABORT() {
       fill_solid(leds, 4, CRGB(0, 0, 0));
     }
     FastLED.show();
+    delay(500);
   }
 }
 
@@ -57,8 +58,8 @@ void initESC() {
   fill_solid(leds, 4, CRGB(LED_Max, 0, LED_Max));
   FastLED.show();
 
-  //Keep ESCs at neutral for a second
-  delay(1000);
+  //Keep ESCs at neutral for two seconds
+  delay(2000);
 }
 
 void setup() {
@@ -67,7 +68,7 @@ void setup() {
   //Set up LEDs
   pinMode(modeLED, OUTPUT);
   FastLED.addLeds<WS2812, A0>(leds, 4);
-  fill_solid(leds, 4, CRGB(255, 0, 0));
+  fill_solid(leds, 4, CRGB(LED_Max, 0, 0));
   FastLED.show();
 
   //Set up radio
@@ -138,16 +139,16 @@ void loop() {
       //Set LED colour
       if (not ESCactivated[i] or ESCval[i] == neutral) {
         //Blue when neutral
-        fill_solid(leds, 4, CRGB(0, 0, LED_Max));
+        leds[i] = CRGB(0, 0, LED_Max);
       } else if (ESCval[i] == minESCval) {
         //Orange when at minimum
-        fill_solid(leds, 4, CRGB(LED_Max, LED_Max/3, 0));
+        leds[i] = CRGB(LED_Max, LED_Max/3, 0);
       } else if (ESCval[i] == maxESCval) {
-        //Orange when at maximum
-        fill_solid(leds, 4, CRGB(0, 0, LED_Max));
+        //Green when at maximum
+        leds[i] = CRGB(0, LED_Max, 0);
       } else {
         //Grey
-        fill_solid(leds, 4, CRGB(LED_Max * (ESCval/maxESCval), LED_Max * (ESCval/maxESCval), LED_Max * (ESCval/maxESCval)));
+        leds[i] = CRGB(LED_Max * (ESCval[i]/maxESCval), LED_Max * (ESCval[i]/maxESCval), LED_Max * (ESCval[i]/maxESCval));
       }
     }
   }
