@@ -70,6 +70,11 @@ void initESC() {
   delay(2000);
 }
 
+int LEDpercent(int index) {
+  float multiplier = ESCval[index]/(float)maxESCval - .5;
+  return LED_Max * multiplier * 1.5;
+}
+
 void setup() {
   delay(1000);
 
@@ -174,7 +179,7 @@ void loop() {
       ESC[i].writeMicroseconds(ESCval[i]);
 
       //Set LED colour
-      if (not ESCactivated[i] or ESCval[i] == neutral) {
+      if (ESCval[i] == neutral) {
         //Blue when neutral
         leds[i] = CRGB(0, 0, LED_Max);
       } else if (ESCval[i] == minESCval) {
@@ -185,7 +190,7 @@ void loop() {
         leds[i] = CRGB(0, LED_Max, 0);
       } else {
         //Grey
-        leds[i] = CRGB(LED_Max * (ESCval[i]/maxESCval), LED_Max * (ESCval[i]/maxESCval), LED_Max * (ESCval[i]/maxESCval));
+        leds[i] = CRGB(LEDpercent(i), LEDpercent(i), LEDpercent(i));
       }
     }
   }
