@@ -20,7 +20,6 @@ CRGB leds[4];
 const int modeLED = 4;
 
 //Misc vars
-unsigned long loopStart;
 bool reverseMode = true; //Reverse mode sets the neutral to the mid point
 int neutral;
 
@@ -46,6 +45,21 @@ void ABORT() {
   }
 }
 
+void initESC() {
+  //Attach ESCs
+  for(int i=0; i<4; i++) {
+    ESC[i].attach(ESCpins[i], minESCval, maxESCval);
+    ESC[i].writeMicroseconds(neutral);
+  }
+
+  //Show that the ESCs are being initialised
+  fill_solid(leds, 4, CRGB(255, 0, 255));
+  FastLED.show();
+
+  //Keep ESCs at neutral for a second
+  delay(1000);
+}
+
 void setup() {
   delay(1000);
 
@@ -54,11 +68,6 @@ void setup() {
   FastLED.addLeds<WS2812, A0>(leds, 4);
   fill_solid(leds, 4, CRGB(255, 0, 0));
   FastLED.show();
-
-  //Set up ESCs
-  for(int i=0; i<4; i++) {
-    ESC[i].attach(ESCpins[i], minESCval, maxESCval);
-  }
 
   //Set up radio
   radio.begin();
@@ -82,8 +91,6 @@ void setup() {
 }
 
 void loop() {
-  loopStart = micros();
-
   if (radio.available()) {
     //Get data from controller
     while (radio.available()) {
@@ -105,6 +112,10 @@ void loop() {
     ///Get joysticks
     ///Get pot
     ///Get buttons
+
+    if () { ///TODO - add condition
+      initESC();
+    }
   }
 
   //Calculate ESC values
@@ -115,11 +126,13 @@ void loop() {
   }
 
   //Apply to hardware
-  for(int i=0; i<4; i++) {
-    if (ESCactivated[i]) {
-      ESC[i].writeMicroseconds(ESCvals);
-    } else {
-      ESC[i].writeMicroseconds(neutral);
+  if (ESC[0].attached()) {
+    for(int i=0; i<4; i++) {
+      if (ESCactivated[i]) {
+        ESC[i].writeMicroseconds(ESCvals);
+      } else {
+        ESC[i].writeMicroseconds(neutral);
+      }
     }
   }
   FastLED.show();
