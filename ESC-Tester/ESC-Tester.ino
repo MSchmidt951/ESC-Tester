@@ -10,7 +10,7 @@ char Data[7]; //Input data from radio
 //ESC vars
 const int ESCpins[4] = {9, 8, 7, 6};
 Servo ESC[4];
-int ESCvals[4];
+int ESCval[4];
 bool ESCactivated[4] = {false, false, false, false};
 const int minESCval = 1000;
 const int maxESCval = 2000;
@@ -18,6 +18,7 @@ const int maxESCval = 2000;
 //LED vars
 CRGB leds[4];
 const int modeLED = 4;
+const int LED_Max = 100;
 
 //Misc vars
 bool reverseMode = true; //Reverse mode sets the neutral to the mid point
@@ -34,7 +35,7 @@ void ABORT() {
   //Blink the LEDs on and off
   while(true) {
     for (int i=0; i<4; i++){
-      fill_solid(leds, 4, CRGB(255, 0, 0));
+      fill_solid(leds, 4, CRGB(LED_Max, 0, 0));
     }
     FastLED.show();
     delay(750);
@@ -53,7 +54,7 @@ void initESC() {
   }
 
   //Show that the ESCs are being initialised
-  fill_solid(leds, 4, CRGB(255, 0, 255));
+  fill_solid(leds, 4, CRGB(LED_Max, 0, LED_Max));
   FastLED.show();
 
   //Keep ESCs at neutral for a second
@@ -129,9 +130,24 @@ void loop() {
   if (ESC[0].attached()) {
     for(int i=0; i<4; i++) {
       if (ESCactivated[i]) {
-        ESC[i].writeMicroseconds(ESCvals);
+        ESC[i].writeMicroseconds(ESCval);
       } else {
         ESC[i].writeMicroseconds(neutral);
+      }
+
+      //Set LED colour
+      if (not ESCactivated[i] or ESCval[i] == neutral) {
+        //Blue when neutral
+        fill_solid(leds, 4, CRGB(0, 0, LED_Max));
+      } else if (ESCval[i] == minESCval) {
+        //Orange when at minimum
+        fill_solid(leds, 4, CRGB(LED_Max, LED_Max/3, 0));
+      } else if (ESCval[i] == maxESCval) {
+        //Orange when at maximum
+        fill_solid(leds, 4, CRGB(0, 0, LED_Max));
+      } else {
+        //Grey
+        fill_solid(leds, 4, CRGB(LED_Max * (ESCval/maxESCval), LED_Max * (ESCval/maxESCval), LED_Max * (ESCval/maxESCval)));
       }
     }
   }
