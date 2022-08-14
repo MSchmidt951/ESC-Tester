@@ -21,10 +21,11 @@ const int modeLED = 4;
 
 //Misc vars
 unsigned long loopStart;
-bool reverseMode = true; ///Explain what reverseMode is
+bool reverseMode = true; //Reverse mode sets the neutral to the mid point
 int neutral;
 
 void ABORT() {
+  //Shut off ESCs
   for (int i=0; i<10; i++){
     for (int j=0; j<4; j++){
       ESC[j].writeMicroseconds(neutral);
@@ -48,16 +49,18 @@ void ABORT() {
 void setup() {
   delay(1000);
 
-  FastLED.addLeds<WS2812, A0>(leds, 4);
+  //Set up LEDs
   pinMode(modeLED, OUTPUT);
+  FastLED.addLeds<WS2812, A0>(leds, 4);
   fill_solid(leds, 4, CRGB(255, 0, 0));
   FastLED.show();
 
+  //Set up ESCs
   for(int i=0; i<4; i++) {
     ESC[i].attach(ESCpins[i], minESCval, maxESCval);
   }
 
-  //Set up communication
+  //Set up radio
   radio.begin();
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_1MBPS);
@@ -104,7 +107,7 @@ void loop() {
     ///Get buttons
   }
 
-  //Calculation stuff ///Change the name of this
+  //Calculate ESC values
   if (reverseMode) {
     neutral = (maxESCval+minESCval)/2;
   } else {
