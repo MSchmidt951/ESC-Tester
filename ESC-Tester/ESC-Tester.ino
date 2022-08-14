@@ -5,7 +5,7 @@
 //Radio vars
 RF24 radio(2, 3); //Sets CE and CSN pins of the radio
 byte addresses[][6] = {"C", "D"};
-char Data[7]; //Input data from radio
+byte data[7]; //Input data from radio
 
 //ESC vars
 const int ESCpins[4] = {9, 8, 7, 6};
@@ -19,6 +19,13 @@ const int maxESCval = 2000;
 CRGB leds[4];
 const int modeLED = 4;
 const int LED_Max = 40;
+
+//Input vars
+bool lastButtonInput[4];
+bool buttonInput[4];
+float leftPercent;
+float rightPercent;
+float potPercent;
 
 //Misc vars
 bool reverseMode = true; //Reverse mode sets the neutral to the mid point
@@ -96,26 +103,40 @@ void loop() {
   if (radio.available()) {
     //Get data from controller
     while (radio.available()) {
-      radio.read(&Data, sizeof(char[7]));
+      radio.read(&data, sizeof(byte[7]));
     }
 
     //Check abort
-    if (bitRead(Data[7], 0)) {
+    if (bitRead(data[6], 0)) {
       ABORT();
     }
 
     //Check standby
-    if (bitRead(Data[7], 0)) {
+    if (bitRead(data[6], 1)) {
       ///standby();
     }
     
     //Get input
-    reverseMode = bitRead(Data[7], 2);
-    ///Get joysticks
-    ///Get pot
-    ///Get buttons
+    reverseMode = bitRead(data[6], 2);
+    //Get joystick input
+    leftPercent = 1 - data[1]/255.0;
+    rightPercent = data[2]/255.0;
+    //Get potentiometer input
+    potPercent = (data[4]-3)/252.0;
+    //Enable/disable ESCs
+    for(int i=0; i<4; i++) {
+      if (not lastButtonInput[i] and buttonInput[i]) {
+        ESCactivated[i] = !ESCactivated[i];
+      }
+      lastButtonInput[i] = buttonInput[i];
+    }
+    buttonInput[0] = bitRead(data[5], 0);
+    buttonInput[1] = bitRead(data[5], 1);
+    buttonInput[2] = bitRead(data[5], 4);
+    buttonInput[3] = bitRead(data[5], 5);
 
-    if () { ///TODO - add condition
+    //If the right switch is on start the ESCs
+    if (bitRead(data[6], 5) and not ESC[0].attached()) {
       initESC();
     }
   }
