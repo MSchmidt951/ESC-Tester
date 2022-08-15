@@ -31,6 +31,7 @@ float potPercent;
 
 //Misc vars
 bool reverseMode = true; //Reverse mode sets the neutral to the mid point
+bool joystickMode = true;
 int neutral;
 
 void ABORT() {
@@ -122,11 +123,6 @@ void loop() {
       ABORT();
     }
 
-    //Check standby
-    if (bitRead(data[6], 1)) {
-      ///standby();
-    }
-
     //Give the joysticks a deadzone
     for(int i=1; i<=2; i++) {
       if (data[i] >= 124 and data[i] <= 130) {
@@ -136,6 +132,7 @@ void loop() {
     
     //Get input
     reverseMode = bitRead(data[6], 2);
+    joystickMode = !bitRead(data[6], 1);
     //Get joystick input
     leftPercent = 1 - data[1]/254.0;
     rightPercent = data[2]/254.0;
@@ -166,20 +163,23 @@ void loop() {
     neutral = minESCval;
   }
   for(int i=0; i<4; i++) {
-    //Set starting value
-    ESCval[i] = 0;
-
-    //If ESC activated, apply change depending on the joystick value
+    //If ESC activated, apply change depending on the inputs
     if (ESCactivated[i]) {
-      if (i < 2) {
-        ESCval[i] += leftPercent*maxESCdiff - maxESCdiff/2;
+      if (joystickMode) {
+        if (i < 2) {
+          ESCval[i] = leftPercent*maxESCdiff - maxESCdiff/2;
+        } else {
+          ESCval[i] = rightPercent*maxESCdiff - maxESCdiff/2;
+        }
       } else {
-        ESCval[i] += rightPercent*maxESCdiff - maxESCdiff/2;
+        ESCval[i] = potPercent * maxESCdiff/2;
       }
 
       if (not reverseMode) {
         ESCval[i] = max(ESCval[i]*2, 0);
       }
+    } else {
+      ESCval[i] = 0;
     }
 
     ESCval[i] += neutral;
