@@ -121,12 +121,19 @@ void loop() {
     if (bitRead(data[6], 1)) {
       ///standby();
     }
+
+    //Give the joysticks a deadzone
+    for(int i=1; i<=2; i++) {
+      if (data[i] >= 124 and data[i] <= 130) {
+        data[i] = 127;
+      }
+    }
     
     //Get input
     reverseMode = bitRead(data[6], 2);
     //Get joystick input
-    leftPercent = 1 - data[1]/255.0;
-    rightPercent = data[2]/255.0;
+    leftPercent = 1 - data[1]/254.0;
+    rightPercent = data[2]/254.0;
     //Get potentiometer input
     potPercent = (data[4]-3)/252.0;
     //Enable/disable ESCs
