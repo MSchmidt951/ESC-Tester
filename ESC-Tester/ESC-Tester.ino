@@ -15,6 +15,7 @@ bool ESCactivated[4];
 const int minESCval = 1000;
 const int maxESCval = 2000;
 const int maxESCdiff = 1000;
+const int ESCstep = 10;
 
 //LED vars
 CRGB leds[4];
@@ -73,6 +74,10 @@ void initESC() {
 int LEDpercent(int index) {
   float multiplier = ESCval[index]/(float)maxESCval - .5;
   return LED_Max * multiplier * 1.5;
+}
+
+int roundStep(int value) {
+  return ((value-1+ESCstep/2)/ESCstep) * ESCstep;
 }
 
 void setup() {
@@ -178,6 +183,9 @@ void loop() {
     }
 
     ESCval[i] += neutral;
+
+    //Round the ESC value
+    ESCval[i] = roundStep(ESCval[i]);
   }
 
   //Apply to hardware
