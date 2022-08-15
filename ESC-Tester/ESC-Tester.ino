@@ -194,7 +194,10 @@ void loop() {
       ESC[i].writeMicroseconds(ESCval[i]);
 
       //Set LED colour
-      if (ESCval[i] == neutral) {
+      if (not ESCactivated[i]) {
+        //Turquoise when ESC not activated
+        leds[i] = CRGB(0, LED_Max/4, LED_Max/2);
+      } else if (ESCval[i] == neutral) {
         //Blue when neutral
         leds[i] = CRGB(0, 0, LED_Max);
       } else if (ESCval[i] == minESCval) {
