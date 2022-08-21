@@ -35,11 +35,9 @@ bool joystickMode = true;
 int neutral;
 
 void ABORT() {
-  //Shut off ESCs
-  for (int i=0; i<10; i++){
-    for (int j=0; j<4; j++){
-      ESC[j].writeMicroseconds(neutral);
-    }
+  //Shut off and detach ESCs
+  for (int i=0; i<4; i++){
+    ESC[i].detach();
   }
 
   //Blink the LEDs on and off
