@@ -2,6 +2,8 @@
 #include <RF24.h>
 #include <Servo.h>
 
+#define SERIAL 0
+
 //Radio vars
 RF24 radio(2, 3); //Sets CE and CSN pins of the radio
 byte addresses[][6] = {"C", "D"};
@@ -105,8 +107,10 @@ void setup() {
   }
   radio.startListening();
 
-  //Start the serial communication
-  Serial.begin(57600);
+  #if SERIAL == 1
+    //Start the serial communication
+    Serial.begin(57600);
+  #endif
 }
 
 void loop() {
@@ -213,10 +217,12 @@ void loop() {
   FastLED.show();
   digitalWrite(modeLED, reverseMode);
 
-  //Print ESC values to serial
-  for(int i=0; i<4; i++) {
-    Serial.print(ESCval[i]);
-    Serial.print('\t');
-  }
-  Serial.println();
+  #if SERIAL == 1
+    //Print ESC values to serial
+    for(int i=0; i<4; i++) {
+      Serial.print(ESCval[i]);
+      Serial.print('\t');
+    }
+    Serial.println();
+  #endif
 }
